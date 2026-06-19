@@ -1,0 +1,216 @@
+[
+  {
+    "timestamp": "2026-06-19T09:30:00Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 3,
+    "payload": "00010000000601030000000a",
+    "notes": "HMI polling holding registers for turbine temperature metrics."
+  },
+  {
+    "timestamp": "2026-06-19T09:30:05Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 43,
+    "payload": "000100000005012b0e0100",
+    "notes": "HMI querying PLC device identification via MEI interface."
+  },
+  {
+    "timestamp": "2026-06-19T09:30:15Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 1,
+    "payload": "056405c2010000000000",
+    "notes": "DNP3 Master station polling Outstation binary input status."
+  },
+  {
+    "timestamp": "2026-06-19T09:30:20Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.30",
+    "protocol": "IEC104",
+    "type_id": 30,
+    "payload": "680e000000001e0103000000",
+    "notes": "RTU reporting telemetry state change (Single-point with time tag CP56Time2a) to control center."
+  },
+  {
+    "timestamp": "2026-06-19T09:30:30Z",
+    "source_ip": "192.168.1.99",
+    "destination_ip": "255.255.255.255",
+    "protocol": "DNP3",
+    "function_code": 1,
+    "payload": "056405c2010000000000",
+    "notes": "DNP3 command directed to network broadcast address (possible reconnaissance/denial of service)."
+  },
+  {
+    "timestamp": "2026-06-19T09:30:45Z",
+    "source_ip": "192.168.1.50",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 1,
+    "payload": "424242c2010000000000",
+    "notes": "Malformed DNP3 packet missing valid start bytes (0x0564)."
+  },
+  {
+    "timestamp": "2026-06-19T09:31:00Z",
+    "source_ip": "192.168.1.222",
+    "destination_ip": "192.168.1.30",
+    "protocol": "IEC104",
+    "type_id": 30,
+    "payload": "42420e000000001e0103000000",
+    "notes": "Malformed IEC 104 packet missing valid start byte (0x68)."
+  },
+  {
+    "timestamp": "2026-06-19T09:31:12Z",
+    "source_ip": "192.168.1.215",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 5,
+    "payload": "00020000000601050010ff00",
+    "notes": "Unauthorized client attempted to force coil 16 (Coil state set to high, potentially tripping safety breaker)."
+  },
+  {
+    "timestamp": "2026-06-19T09:31:45Z",
+    "source_ip": "192.168.1.215",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 3,
+    "payload": "05640bc20300000000000c012801000100070101",
+    "notes": "Unauthorized IP issuing DNP3 Select command to arm a remote trip breaker."
+  },
+  {
+    "timestamp": "2026-06-19T09:31:55Z",
+    "source_ip": "192.168.1.215",
+    "destination_ip": "192.168.1.30",
+    "protocol": "IEC104",
+    "type_id": 46,
+    "payload": "680e000000002e0106000000",
+    "notes": "Unauthorized host executing double command (Type ID 46) to trip a critical transmission line breaker."
+  },
+  {
+    "timestamp": "2026-06-19T09:32:00Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.20",
+    "protocol": "S7Comm",
+    "function_code": 240,
+    "payload": "0300001611e00000000100c0010a0100c2020101c0010ac0010a",
+    "notes": "Establishing S7Comm communication setup with Siemens controller."
+  },
+  {
+    "timestamp": "2026-06-19T09:32:15Z",
+    "source_ip": "192.168.1.215",
+    "destination_ip": "192.168.1.20",
+    "protocol": "S7Comm",
+    "function_code": 41,
+    "payload": "0300002102f08032010000050000080000290000000000095f5344455256494345",
+    "notes": "Unauthorized source attempting to send PLC STOP command (PI-Service: Stop PLC) to Siemens controller."
+  },
+  {
+    "timestamp": "2026-06-19T09:32:45Z",
+    "source_ip": "192.168.1.50",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 6,
+    "payload": "0003000000060106000100c8",
+    "notes": "Authorized Engineering Workstation updating PID controller setpoint."
+  },
+  {
+    "timestamp": "2026-06-19T09:33:10Z",
+    "source_ip": "192.168.1.50",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 5,
+    "payload": "05640bc20500000000000c012801000100070101",
+    "notes": "Authorized engineering workstation executing DNP3 Direct Operate command."
+  },
+  {
+    "timestamp": "2026-06-19T09:33:20Z",
+    "source_ip": "192.168.1.50",
+    "destination_ip": "192.168.1.30",
+    "protocol": "IEC104",
+    "type_id": 45,
+    "payload": "680e000000002d0106000000",
+    "notes": "Authorized Engineering Workstation executing IEC 104 Single Command (Type ID 45)."
+  },
+  {
+    "timestamp": "2026-06-19T09:33:30Z",
+    "source_ip": "192.168.1.50",
+    "destination_ip": "192.168.1.20",
+    "protocol": "S7Comm",
+    "function_code": 5,
+    "payload": "0300001d02f080320100000500000e00000501120a1002000100010084000000",
+    "notes": "Authorized Engineering Workstation executing S7Comm Write Var register modification."
+  },
+  {
+    "timestamp": "2026-06-19T09:34:02Z",
+    "source_ip": "192.168.1.105",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 99,
+    "payload": "000400000006016300000000",
+    "notes": "Anomalous packet detected containing custom/invalid function code 99."
+  },
+  {
+    "timestamp": "2026-06-19T09:34:30Z",
+    "source_ip": "192.168.1.105",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 99,
+    "payload": "056405c2630000000000",
+    "notes": "Anomalous DNP3 payload with non-standard function code 99."
+  },
+  {
+    "timestamp": "2026-06-19T09:34:40Z",
+    "source_ip": "192.168.1.105",
+    "destination_ip": "192.168.1.30",
+    "protocol": "IEC104",
+    "type_id": 99,
+    "payload": "680e00000000630106000000",
+    "notes": "Anomalous IEC 104 packet with unrecognized type identifier 99."
+  },
+  {
+    "timestamp": "2026-06-19T09:35:10Z",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 1,
+    "payload": "000500000006010100000008",
+    "notes": "HMI polling coil status."
+  },
+  {
+    "timestamp": "2026-06-19T09:36:18Z",
+    "source_ip": "192.168.1.222",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 15,
+    "payload": "000600000009010f0000000801ff",
+    "notes": "External unknown IP attempting to write multiple coils on controller."
+  },
+  {
+    "timestamp": "2026-06-19T09:36:45Z",
+    "source_ip": "192.168.1.222",
+    "destination_ip": "192.168.1.12",
+    "protocol": "DNP3",
+    "function_code": 27,
+    "payload": "05640bc21b00000000000c012801000100070101",
+    "notes": "External unknown IP attempting critical file deletion (DNP3 FC: 27 - Delete File) on outstation."
+  },
+  {
+    "timestamp": "2026-06-19T09:37:10Z",
+    "source_ip": "192.168.1.222",
+    "destination_ip": "192.168.1.20",
+    "protocol": "S7Comm",
+    "function_code": 26,
+    "payload": "0300001a02f080320100000500000800001a0000000000095f5344455256494345",
+    "notes": "External unknown IP attempting S7Comm Block Download command to upload rogue PLC firmware."
+  }
+]

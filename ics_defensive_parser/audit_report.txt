@@ -1,0 +1,157 @@
+=====================================================================================
+               NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               
+Generated on: 2026-06-19 09:58:58
+Scope: Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit
+=====================================================================================
+
+[2026-06-19T09:30:05Z] SEVERITY: INFO | NCIIPC Control: Sec 6.4 - Operational Audit Logging | Protocol: ModbusTCP
+  Event Type  : 43
+  Details     : Modbus administrative action (Read Device Identification) performed from source IP 192.168.1.100.
+  Source IP   : 192.168.1.100 -> Destination IP: 192.168.1.5
+  Payload     : 000100000005012b0e0100
+  Log Note    : HMI querying PLC device identification via MEI interface.
+  Resolution  : Modbus MEI Device ID read query. Standard asset identification sequence.
+--------------------------------------------------------------------------------
+[2026-06-19T09:30:30Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: DNP3
+  Event Type  : dnp3_broadcast_anomaly
+  Details     : CRITICAL: DNP3 command directed to broadcast destination 255.255.255.255 from source IP 192.168.1.99.
+  Source IP   : 192.168.1.99 -> Destination IP: 255.255.255.255
+  Payload     : 056405c2010000000000
+  Log Note    : DNP3 command directed to network broadcast address (possible reconnaissance/denial of service).
+  Resolution  : Control messages directed to broadcast endpoints violates segment containment guidelines.
+--------------------------------------------------------------------------------
+[2026-06-19T09:30:45Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: DNP3
+  Event Type  : dnp3_start_byte_anomaly
+  Details     : CRITICAL: Malformed DNP3 packet missing valid start bytes sync pattern (0x0564).
+  Source IP   : 192.168.1.50 -> Destination IP: 192.168.1.12
+  Payload     : 424242c2010000000000
+  Log Note    : Malformed DNP3 packet missing valid start bytes (0x0564).
+  Resolution  : DNP3 frame lacks 0x0564 sync headers, indicative of packet corruption or scanning anomalies.
+--------------------------------------------------------------------------------
+[2026-06-19T09:31:00Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: IEC104
+  Event Type  : iec104_start_byte_anomaly
+  Details     : CRITICAL: Malformed IEC 104 packet missing APCI start byte sync pattern (0x68).
+  Source IP   : 192.168.1.222 -> Destination IP: 192.168.1.30
+  Payload     : 42420e000000001e0103000000
+  Log Note    : Malformed IEC 104 packet missing valid start byte (0x68).
+  Resolution  : IEC 104 packet lacks standard start bytes (0x68), indicating malformed transport frames or fuzzed packets.
+--------------------------------------------------------------------------------
+[2026-06-19T09:31:12Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: ModbusTCP
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized Modbus write (FC: 5) attempted on Unit ID 1 from non-workstation IP 192.168.1.215.
+  Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.5
+  Payload     : 00020000000601050010ff00
+  Log Note    : Unauthorized client attempted to force coil 16 (Coil state set to high, potentially tripping safety breaker).
+  Resolution  : A write command was issued to an ICS Modbus PLC endpoint from an unauthorized source IP address.
+--------------------------------------------------------------------------------
+[2026-06-19T09:31:45Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: DNP3
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized DNP3 control action (Select (Select Before Operate)) attempted on outstation from non-workstation IP 192.168.1.215.
+  Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.12
+  Payload     : 05640bc20300000000000c012801000100070101
+  Log Note    : Unauthorized IP issuing DNP3 Select command to arm a remote trip breaker.
+  Resolution  : A DNP3 control action (Write/Select/Operate/Reset) was attempted from an unauthorized source IP address.
+--------------------------------------------------------------------------------
+[2026-06-19T09:31:55Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: IEC104
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized IEC 104 command action (Double Command Execution) attempted on RTU from non-workstation IP 192.168.1.215.
+  Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.30
+  Payload     : 680e000000002e0106000000
+  Log Note    : Unauthorized host executing double command (Type ID 46) to trip a critical transmission line breaker.
+  Resolution  : An unauthorized IEC 104 command execution was attempted on the RTU/IED.
+--------------------------------------------------------------------------------
+[2026-06-19T09:32:15Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: S7Comm
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized S7Comm control action (PLC Stop (Process Halt)) attempted on Siemens PLC from non-workstation IP 192.168.1.215.
+  Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.20
+  Payload     : 0300002102f08032010000050000080000290000000000095f5344455256494345
+  Log Note    : Unauthorized source attempting to send PLC STOP command (PI-Service: Stop PLC) to Siemens controller.
+  Resolution  : An unauthorized S7Comm command (Write/PLC Stop/Download) was attempted on a Siemens PLC.
+--------------------------------------------------------------------------------
+[2026-06-19T09:32:45Z] SEVERITY: INFO | NCIIPC Control: Sec 6.4 - Operational Audit Logging | Protocol: ModbusTCP
+  Event Type  : authorized_write_activity
+  Details     : Authorized Modbus register write (FC: 6) executed on Unit ID 1 from workstation 192.168.1.50.
+  Source IP   : 192.168.1.50 -> Destination IP: 192.168.1.5
+  Payload     : 0003000000060106000100c8
+  Log Note    : Authorized Engineering Workstation updating PID controller setpoint.
+  Resolution  : An authorized Modbus register modification was performed by a verified engineering workstation.
+--------------------------------------------------------------------------------
+[2026-06-19T09:33:10Z] SEVERITY: INFO | NCIIPC Control: Sec 6.4 - Operational Audit Logging | Protocol: DNP3
+  Event Type  : authorized_write_activity
+  Details     : Authorized DNP3 control action (Direct Operate (Immediate Command)) executed on outstation from workstation 192.168.1.50.
+  Source IP   : 192.168.1.50 -> Destination IP: 192.168.1.12
+  Payload     : 05640bc20500000000000c012801000100070101
+  Log Note    : Authorized engineering workstation executing DNP3 Direct Operate command.
+  Resolution  : Authorized DNP3 control operation performed by verified engineering workstation.
+--------------------------------------------------------------------------------
+[2026-06-19T09:33:20Z] SEVERITY: INFO | NCIIPC Control: Sec 6.4 - Operational Audit Logging | Protocol: IEC104
+  Event Type  : authorized_write_activity
+  Details     : Authorized IEC 104 command action (Single Command Execution) executed on RTU from workstation 192.168.1.50.
+  Source IP   : 192.168.1.50 -> Destination IP: 192.168.1.30
+  Payload     : 680e000000002d0106000000
+  Log Note    : Authorized Engineering Workstation executing IEC 104 Single Command (Type ID 45).
+  Resolution  : Authorized IEC 104 command action verified from engineering workstation.
+--------------------------------------------------------------------------------
+[2026-06-19T09:33:30Z] SEVERITY: INFO | NCIIPC Control: Sec 6.4 - Operational Audit Logging | Protocol: S7Comm
+  Event Type  : authorized_write_activity
+  Details     : Authorized S7Comm control action (Write Var (Data modification)) executed on Siemens PLC from workstation 192.168.1.50.
+  Source IP   : 192.168.1.50 -> Destination IP: 192.168.1.20
+  Payload     : 0300001d02f080320100000500000e00000501120a1002000100010084000000
+  Log Note    : Authorized Engineering Workstation executing S7Comm Write Var register modification.
+  Resolution  : Authorized S7Comm control operation executed by verified engineering workstation.
+--------------------------------------------------------------------------------
+[2026-06-19T09:34:02Z] SEVERITY: WARNING | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: ModbusTCP
+  Event Type  : unknown_function_code
+  Details     : WARNING: Unknown Modbus function code 99 detected from source IP 192.168.1.105.
+  Source IP   : 192.168.1.105 -> Destination IP: 192.168.1.5
+  Payload     : 000400000006016300000000
+  Log Note    : Anomalous packet detected containing custom/invalid function code 99.
+  Resolution  : An unrecognized Modbus function code was detected, representing anomalous packet structure.
+--------------------------------------------------------------------------------
+[2026-06-19T09:34:30Z] SEVERITY: WARNING | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: DNP3
+  Event Type  : unknown_function_code
+  Details     : WARNING: Unknown DNP3 function code 99 detected from source IP 192.168.1.105.
+  Source IP   : 192.168.1.105 -> Destination IP: 192.168.1.12
+  Payload     : 056405c2630000000000
+  Log Note    : Anomalous DNP3 payload with non-standard function code 99.
+  Resolution  : An unrecognized DNP3 function code was detected, potential anomalous packet structure.
+--------------------------------------------------------------------------------
+[2026-06-19T09:34:40Z] SEVERITY: WARNING | NCIIPC Control: Sec 6.1 - Protocol Validation | Protocol: IEC104
+  Event Type  : unknown_function_code
+  Details     : WARNING: Unknown/Unmonitored IEC 104 ASDU Type ID 99 detected from source IP 192.168.1.105.
+  Source IP   : 192.168.1.105 -> Destination IP: 192.168.1.30
+  Payload     : 680e00000000630106000000
+  Log Note    : Anomalous IEC 104 packet with unrecognized type identifier 99.
+  Resolution  : An unrecognized or unmonitored ASDU Type ID was detected in IEC 104 telemetry.
+--------------------------------------------------------------------------------
+[2026-06-19T09:36:18Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: ModbusTCP
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized Modbus write (FC: 15) attempted on Unit ID 1 from non-workstation IP 192.168.1.222.
+  Source IP   : 192.168.1.222 -> Destination IP: 192.168.1.5
+  Payload     : 000600000009010f0000000801ff
+  Log Note    : External unknown IP attempting to write multiple coils on controller.
+  Resolution  : A write command was issued to an ICS Modbus PLC endpoint from an unauthorized source IP address.
+--------------------------------------------------------------------------------
+[2026-06-19T09:36:45Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: DNP3
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized DNP3 control action (Delete File) attempted on outstation from non-workstation IP 192.168.1.222.
+  Source IP   : 192.168.1.222 -> Destination IP: 192.168.1.12
+  Payload     : 05640bc21b00000000000c012801000100070101
+  Log Note    : External unknown IP attempting critical file deletion (DNP3 FC: 27 - Delete File) on outstation.
+  Resolution  : A DNP3 control action (Write/Select/Operate/Reset) was attempted from an unauthorized source IP address.
+--------------------------------------------------------------------------------
+[2026-06-19T09:37:10Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: S7Comm
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized S7Comm control action (Download Request (Firmware/Block)) attempted on Siemens PLC from non-workstation IP 192.168.1.222.
+  Source IP   : 192.168.1.222 -> Destination IP: 192.168.1.20
+  Payload     : 0300001a02f080320100000500000800001a0000000000095f5344455256494345
+  Log Note    : External unknown IP attempting S7Comm Block Download command to upload rogue PLC firmware.
+  Resolution  : An unauthorized S7Comm command (Write/PLC Stop/Download) was attempted on a Siemens PLC.
+--------------------------------------------------------------------------------
+
+================================================================================
+SUMMARY STATISTICS:
+Total Logs Parsed   : 23
+Compliance Alerts   : 18
+Critical Warnings   : 13
+================================================================================
