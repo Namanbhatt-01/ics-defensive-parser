@@ -10,3 +10,11 @@ Thumbs.db
 
 # Ignore local runtime compliance reports
 audit_report.txt
+
+# Local environment secrets
+.env
+*.env
+
+# Scratch / build artifacts
+generate_cast.py
+demo.cast

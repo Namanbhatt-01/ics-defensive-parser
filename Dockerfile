@@ -5,17 +5,18 @@ FROM python:3.10-alpine
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Establish isolated workspace directory
+# Establish isolated workspace directory inside the container
 WORKDIR /app
 
-# Copy dependency specifications (Standard Library only, but represents standard practices)
+# Copy dependency specifications (Standard Library only, but follows standard DevOps practice)
 COPY requirements.txt ./
 
 # Install requirements if any are declared
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all core files, rules, and mock database entries
-COPY . .
+# Copy the engine package and data directory (required at runtime)
+COPY ics_defensive_parser/ ./ics_defensive_parser/
+COPY data/ ./data/
 
 # Run the auditor main loop as the default container execution command
-CMD ["python", "main.py"]
+CMD ["python3", "ics_defensive_parser/main.py"]

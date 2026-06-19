@@ -40,31 +40,31 @@ ics-defensive-parser/
 │   └── workflows/
 │       ├── test.yml
 │       └── dependabot.yml
-├── ics_defensive_parser/
+├── ics_defensive_parser/         ← Core engine package
 │   ├── __init__.py
-│   ├── main.py
+│   ├── main.py                   ← Entry point / audit engine
+│   ├── utils.py                  ← Input validation helpers
 │   ├── parsers/
 │   │   ├── __init__.py
 │   │   ├── dnp3_parser.py
 │   │   ├── iec104_parser.py
 │   │   ├── modbus_parser.py
 │   │   └── s7_parser.py
-│   └── utils.py
-├── data/
+│   ├── CHANGELOG.md
+│   ├── CONTRIBUTING.md
+│   ├── LICENSE
+│   ├── README.md                 ← This file
+│   └── SECURITY.md
+├── data/                         ← Configuration & mock data
 │   ├── mock_logs.json
 │   └── rules.json
-├── tests/
+├── tests/                        ← Automated zone-based test suite
 │   ├── __init__.py
 │   └── run_compliance_tests.py
 ├── .gitignore
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── Dockerfile
-├── LICENSE
+├── Dockerfile                    ← Docker build context at repo root
 ├── Makefile
-├── README.md
-├── requirements.txt
-└── SECURITY.md
+└── requirements.txt
 ```
 
 ---
@@ -209,9 +209,9 @@ If an unauthorized host executes this engine locally on an engineering workstati
 
 ## 🖥️ Visual Demo
 
-An interactive log processing session is represented below:
+Live session showing `make test` (10/10 PASS) followed by `make run` with real CRITICAL/WARNING/INFO alerts across all 4 ICS protocols:
 
-[![Asciicast Demo Run](https://asciinema.org/a/ics-compliance-auditor-demo.svg)](https://asciinema.org/a/ics-compliance-auditor-demo)
+[![Asciicast Demo Run](https://asciinema.org/a/E6tI26ZkbH3MZDgT.svg)](https://asciinema.org/a/E6tI26ZkbH3MZDgT)
 
 ---
 
@@ -236,13 +236,16 @@ python3 main.py
 ```
 
 ### Option B: Docker Containerized Execution
-You can run the tool in an isolated container environment using Docker:
+You can run the tool in an isolated container environment using Docker. The `Dockerfile` lives at the **repository root** and correctly bundles both the engine package and the `data/` directory:
 ```bash
-# 1. Build the Docker container image
+# 1. Build the Docker container image (run from repo root)
 docker build -t ics-auditor .
 
 # 2. Run the auditor container
 docker run --rm ics-auditor
+
+# Or use the Makefile shortcut:
+make docker-build && make docker-run
 ```
 
 ---

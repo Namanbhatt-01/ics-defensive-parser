@@ -31,7 +31,7 @@ security:
 	bandit -r ics_defensive_parser/ tests/ -ll -ii
 
 docker-build:
-	docker build -t ics-auditor ./ics_defensive_parser
+	docker build -t ics-auditor .
 
 docker-run:
 	docker run --rm ics-auditor
