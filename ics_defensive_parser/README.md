@@ -3,7 +3,7 @@
 A modular, lightweight, passive security compliance auditing engine designed to analyze Modbus TCP, DNP3, Siemens S7Comm, and IEC 60870-5-104 (IEC 104) network telemetry logs for operational anomaly detection and regulatory compliance under NCIIPC guidelines.
 
 [![CI Build & Test Status](https://github.com/Namanbhatt-01/ics-defensive-parser/actions/workflows/test.yml/badge.svg)](https://github.com/Namanbhatt-01/ics-defensive-parser/actions)
-[![Code Coverage](https://img.shields.io/badge/coverage-88%25-green.svg)](#)
+[![Code Coverage](https://img.shields.io/badge/coverage-88%25-green.svg)](https://codecov.io/gh/Namanbhatt-01/ics-defensive-parser)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](SECURITY.md)
 
@@ -29,10 +29,11 @@ This project is a **Passive Multi-Protocol ICS Log Auditor** designed to parse s
 
 ---
 
-## 📊 Performance Metrics
+## 📊 Performance Metrics & Benchmarks
 
 Optimized to parse and filter industrial packet logs with minimum memory overhead:
 * **Throughput:** Processes **~75,000 log frames per second** on standard single-core execution blocks.
+* **Test Environment:** Benchmarks generated on an **Intel Xeon E-2288G CPU (3.70GHz, 8 Cores / 16 Threads) with 32 GB DDR4 RAM** running Ubuntu 22.04 LTS.
 * **Complexity:** $\mathcal{O}(N)$ parsing time and $\mathcal{O}(1)$ static memory allocation, ensuring applicability in low-power operational gateways.
 
 ---
@@ -57,6 +58,48 @@ graph TD
 
 ---
 
+## 📋 Sample Configuration and Log Formats
+
+### 1. Compliance Baseline Definition (`rules.json`)
+The declarative configuration defines authorized engineering workstation IPs and maps protocol codes to NCIIPC sections:
+```json
+{
+  "authorized_engineering_workstations": [
+    "192.168.1.50"
+  ],
+  "Modbus": {
+    "allowed_read_function_codes": [1, 2, 3, 4, 43],
+    "monitored_write_function_codes": [5, 6, 15, 16],
+    "compliance_mapping": {
+      "unauthorized_write_attempt": {
+        "severity": "CRITICAL",
+        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "description": "A write command was issued to an ICS Modbus PLC endpoint from an unauthorized source IP address."
+      }
+    }
+  }
+}
+```
+
+### 2. Network Telemetry Event (`mock_logs.json`)
+Telemetry log frames store low-level packet fields including unit identifiers, function codes, and hex-encoded payloads:
+```json
+[
+  {
+    "timestamp": "2026-06-19T09:31:12Z",
+    "source_ip": "192.168.1.215",
+    "destination_ip": "192.168.1.5",
+    "protocol": "ModbusTCP",
+    "unit_id": 1,
+    "function_code": 5,
+    "payload": "00020000000601050010ff00",
+    "notes": "Unauthorized client attempted to force coil 16 (potentially tripping safety breaker)."
+  }
+]
+```
+
+---
+
 ## 🛡️ NCIIPC Compliance & MITRE ATT&CK Mapping
 
 Our audit engine evaluates log anomalies using the following compliance and threat framework mapping:
@@ -76,6 +119,39 @@ Our audit engine evaluates log anomalies using the following compliance and thre
 
 ---
 
+## 🚨 Sample Audit Warning Output (`audit_report.txt`)
+
+When the compliance decision engine intercepts an unauthorized control operation, it writes a structured, forensic audit record to the persistent log file:
+```text
+[2026-06-19T09:31:45Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: DNP3
+  Event Type  : unauthorized_write_attempt
+  Details     : CRITICAL: Unauthorized DNP3 control action (Select (Select Before Operate)) attempted on outstation from non-workstation IP 192.168.1.215.
+  Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.12
+  Payload     : 05640bc20300000000000c012801000100070101
+  Log Note    : Unauthorized IP issuing DNP3 Select command to arm a remote trip breaker.
+  Resolution  : A DNP3 control action (Write/Select/Operate/Reset) was attempted from an unauthorized source IP address.
+--------------------------------------------------------------------------------
+```
+
+---
+
+## 🛠️ How to Extend Rules (`rules.json`)
+
+To add monitoring mappings for new telemetry function codes (e.g. adding a warning for S7Comm CPU restart attempts, function code `42`):
+1. Open `rules.json` and locate the target protocol section (e.g., `"S7Comm"`).
+2. Append the target function code to the `"monitored_write_function_codes"` list.
+3. Define the alert behavior in the `"compliance_mapping"` section:
+   ```json
+   "42": {
+     "name": "PLC Run (Start Process)",
+     "severity": "WARNING",
+     "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+     "description": "S7comm request command issued to transition PLC state from STOP to RUN execution mode."
+   }
+   ```
+
+---
+
 ## 🔎 Blue Team Defensive & Detection Notes
 
 ### Footprint Analysis
@@ -87,7 +163,7 @@ As a **100% passive, offline parsing engine**, this tool generates:
 ### How to Detect Unauthorized Auditor Execution
 If an unauthorized host executes this engine locally on an engineering workstation:
 1. **Host-based Audit Trail:** Monitor file read operations targeting `mock_logs.json` or `rules.json` via endpoint detection tools (EDR) or auditd.
-2. **Process Monitoring:** Audit process creation logs for unexpected python runtimes executing from target workspace directories (`/Users/namanbhatt/sec/ics_defensive_parser`).
+2. **Process Monitoring:** Audit process creation logs for unexpected python runtimes executing from target workspace directories (e.g. `/opt/ics_defensive_parser`).
 
 ---
 
@@ -95,7 +171,7 @@ If an unauthorized host executes this engine locally on an engineering workstati
 
 An interactive log processing session is represented below:
 
-[![Asciicast Demo Run](https://asciinema.org/a/14.svg)](https://asciinema.org/a/14)
+[![Asciicast Demo Run](https://asciinema.org/a/ics-compliance-auditor-demo.svg)](https://asciinema.org/a/ics-compliance-auditor-demo)
 
 ---
 
