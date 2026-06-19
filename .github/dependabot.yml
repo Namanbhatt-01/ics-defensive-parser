@@ -6,6 +6,6 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "pip"
-    directory: "/ics_defensive_parser"
+    directory: "/"
     schedule:
       interval: "weekly"
