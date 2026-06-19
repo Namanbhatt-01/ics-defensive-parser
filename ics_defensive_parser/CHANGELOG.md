@@ -21,5 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-06-19
 ### Added
 - Initial release containing passive Modbus TCP and DNP3 log parsers.
-- Implemented declarative compliance baseline mapping guidelines matching **NCIIPC Sec 6** constraints.
+- Implemented declarative compliance baseline mapping guidelines matching **CII Sec 6** constraints.
 - Integrated persistent reporting logs generation (`audit_report.txt`).

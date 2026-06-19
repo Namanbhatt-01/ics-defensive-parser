@@ -3,7 +3,7 @@
 """
 ICS Compliance Auditor - Test Suite & Verification Engine
 Executes automated zone-based testing to verify protocol decoding anomalies,
-logical boundary segmentation, and NCIIPC security rules compliance.
+logical boundary segmentation, and CII security rules compliance.
 """
 
 import json
@@ -59,7 +59,7 @@ class ICSTestRunner:
         parsed = parse_modbus_log(modbus_id)
         fc = parsed["function_code"]
         mapping = self.rules["Modbus"]["compliance_mapping"].get(str(fc), {})
-        if mapping.get("severity") == "INFO" and mapping.get("nciipc_control") == "Sec 6.4 - Operational Audit Logging":
+        if mapping.get("severity") == "INFO" and mapping.get("cii_control") == "Sec 6.4 - Operational Audit Logging":
             self.log_test_result("Zone 1", "Modbus FC 43 ID query", "PASS", "Device ID read maps to Sec 6.4 (INFO).")
         else:
             self.log_test_result("Zone 1", "Modbus FC 43 ID query", "FAIL", "Device ID mapping mismatch.")

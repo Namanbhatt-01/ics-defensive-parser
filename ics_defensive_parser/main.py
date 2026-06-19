@@ -3,7 +3,7 @@
 Passive Multi-Protocol ICS Network Compliance Auditing Engine
 Integrates defensive validation logic for Modbus TCP, DNP3, Siemens S7Comm, and IEC 60870-5-104 (IEC 104).
 Maps anomalous control actions, protocol validation issues, and network anomalies
-directly to NCIIPC compliance guidelines and calculates operational risk scores.
+directly to CII compliance guidelines and calculates operational risk scores.
 """
 
 import json
@@ -52,7 +52,7 @@ def load_json_file(file_path):
         sys.exit(1)
 
 def calculate_threat_level(score):
-    """Maps a numerical threat score to an NCIIPC operational threat level category."""
+    """Maps a numerical threat score to an CII operational threat level category."""
     if score <= 15:
         return "LOW", "Nominal Operational Baseline"
     elif score <= 40:
@@ -95,7 +95,7 @@ def main():
     try:
         with open(audit_report_path, 'w') as report:
             report.write("=" * 85 + "\n")
-            report.write("               NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               \n")
+            report.write("               CII ICS MULTI-PROTOCOL COMPLIANCE REPORT               \n")
             report.write(f"Generated on : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             report.write("Scope        : Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit\n")
             report.write(f"Filter Level : {config_threshold} and higher\n")
@@ -130,7 +130,7 @@ def main():
             comp_map = {
                 "invalid_ip_anomaly": {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "Network telemetry log contains malformed IP address headers. Violates basic IP routing guidelines."
                 }
             }
@@ -152,7 +152,7 @@ def main():
             comp_map = {
                 "malformed_payload_anomaly": {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "Binary payload contains non-hex characters. Indicates potential frame injection or log corruption."
                 }
             }
@@ -231,7 +231,7 @@ def main():
                 }
                 comp_map["dnp3_start_byte_anomaly"] = {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "DNP3 frame lacks 0x0564 sync headers, indicative of packet corruption or scanning anomalies."
                 }
                 warnings_found += 1
@@ -243,7 +243,7 @@ def main():
                 }
                 comp_map["dnp3_broadcast_anomaly"] = {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "Control messages directed to broadcast endpoints violates segment containment guidelines."
                 }
                 warnings_found += 1
@@ -255,7 +255,7 @@ def main():
                 }
                 comp_map["dnp3_func_code_anomaly"] = {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "DNP3 function code value lies outside standardized definitions (0-131)."
                 }
                 warnings_found += 1
@@ -353,7 +353,7 @@ def main():
                 }
                 comp_map["iec104_start_byte_anomaly"] = {
                     "severity": "CRITICAL",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "IEC 104 packet lacks standard start bytes (0x68), indicating malformed transport frames or fuzzed packets."
                 }
                 warnings_found += 1
@@ -395,7 +395,7 @@ def main():
             comp_map = {
                 "unsupported_protocol": {
                     "severity": "WARNING",
-                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "cii_control": "Sec 6.1 - Protocol Validation",
                     "description": "Network telemetry log belongs to an unrecognized or unmonitored protocol."
                 }
             }
@@ -414,7 +414,7 @@ def main():
             func_code_str = str(parsed.get("function_code") if "function_code" in parsed else parsed.get("type_id"))
             mapping = comp_map.get(alert["type"], comp_map.get(func_code_str, {}))
             severity = mapping.get("severity", "UNKNOWN")
-            nciipc_ctrl = mapping.get("nciipc_control", "N/A")
+            cii_ctrl = mapping.get("cii_control", "N/A")
             desc = mapping.get("description", "")
             
             # Accumulate operational risk score dynamically based on rules weight mappings
@@ -427,7 +427,7 @@ def main():
             
             if severity_weight >= threshold_weight:
                 audit_log_entry = (
-                    f"[{parsed.get('timestamp')}] SEVERITY: {severity} | NCIIPC Control: {nciipc_ctrl} | Protocol: {parsed['protocol']}\n"
+                    f"[{parsed.get('timestamp')}] SEVERITY: {severity} | CII Control: {cii_ctrl} | Protocol: {parsed['protocol']}\n"
                     f"  Event Type  : {alert['type']}\n"
                     f"  Details     : {alert['details']}\n"
                     f"  Source IP   : {parsed['source_ip']} -> Destination IP: {parsed['destination_ip']}\n"
@@ -447,7 +447,7 @@ def main():
                 else:
                     color_prefix = "\033[94m[*] INFO\033[0m"
                     
-                print(f"{color_prefix} Protocol: {parsed['protocol']} | IP: {parsed['source_ip']} | NCIIPC: {nciipc_ctrl}")
+                print(f"{color_prefix} Protocol: {parsed['protocol']} | IP: {parsed['source_ip']} | CII: {cii_ctrl}")
 
     # Finalize Threat Level Assessments
     clamped_threat_score = min(100, max(0, accumulated_threat_score))

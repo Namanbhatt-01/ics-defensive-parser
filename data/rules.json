@@ -24,22 +24,22 @@
       "43": {
         "name": "Read Device Identification",
         "severity": "INFO",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "Modbus MEI Device ID read query. Standard asset identification sequence."
       },
       "unauthorized_write_attempt": {
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "A write command was issued to an ICS Modbus PLC endpoint from an unauthorized source IP address."
       },
       "authorized_write_activity": {
         "severity": "INFO",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "An authorized Modbus register modification was performed by a verified engineering workstation."
       },
       "unknown_function_code": {
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.1 - Protocol Validation",
+        "cii_control": "Sec 6.1 - Protocol Validation",
         "description": "An unrecognized Modbus function code was detected, representing anomalous packet structure."
       }
     }
@@ -51,82 +51,82 @@
       "2": {
         "name": "Write (Configuration Command)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 Write command issued to update remote register settings."
       },
       "3": {
         "name": "Select (Select Before Operate)",
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "DNP3 Select command received. Outstation armed for control operation."
       },
       "4": {
         "name": "Operate (Execution Command)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 Operate command executed. Physical controller state modified."
       },
       "5": {
         "name": "Direct Operate (Immediate Command)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 Direct Operate command executed immediately without a Select stage."
       },
       "6": {
         "name": "Direct Operate - No Ack",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 Direct Operate - No Ack command executed. Outstation state modified without confirmation."
       },
       "9": {
         "name": "Warm Restart",
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command to initiate a warm reset on the RTU/Outstation controller."
       },
       "13": {
         "name": "Cold Restart",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command to initiate a cold reset, potentially interrupting remote telemetry processes."
       },
       "14": {
         "name": "Warm Restart",
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command to initiate a warm reset on the RTU/Outstation controller."
       },
       "15": {
         "name": "Initialize Data",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command to re-initialize configuration registers or memory space."
       },
       "18": {
         "name": "Application Termination",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command ordering application shutdown on outstation runtime environment."
       },
       "27": {
         "name": "Delete File",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "DNP3 command attempting to delete remote system files on the Outstation."
       },
       "unauthorized_write_attempt": {
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "A DNP3 control action (Write/Select/Operate/Reset) was attempted from an unauthorized source IP address."
       },
       "authorized_write_activity": {
         "severity": "INFO",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "Authorized DNP3 control operation performed by verified engineering workstation."
       },
       "unknown_function_code": {
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.1 - Protocol Validation",
+        "cii_control": "Sec 6.1 - Protocol Validation",
         "description": "An unrecognized DNP3 function code was detected, potential anomalous packet structure."
       }
     }
@@ -138,40 +138,40 @@
       "5": {
         "name": "Write Var (Data modification)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "S7Comm Write request attempting block data manipulation or variable register overwrite."
       },
       "26": {
         "name": "Download Request (Firmware/Block)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.3 - Firmware Integrity",
+        "cii_control": "Sec 6.3 - Firmware Integrity",
         "description": "S7Comm Download command issued. Modifies logic/program code blocks running on the Siemens PLC."
       },
       "40": {
         "name": "PLC Run (Start Process)",
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "S7Comm command instructing the PLC to exit STOP mode and execute program logic."
       },
       "41": {
         "name": "PLC Stop (Process Halt)",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "S7Comm command forcing the Siemens PLC into STOP mode, instantly halting critical field operations."
       },
       "unauthorized_write_attempt": {
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "An unauthorized S7Comm command (Write/PLC Stop/Download) was attempted on a Siemens PLC."
       },
       "authorized_write_activity": {
         "severity": "INFO",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "Authorized S7Comm control operation executed by verified engineering workstation."
       },
       "unknown_function_code": {
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.1 - Protocol Validation",
+        "cii_control": "Sec 6.1 - Protocol Validation",
         "description": "An unrecognized S7comm function code was detected, potential anomalous packet structure."
       }
     }
@@ -183,28 +183,28 @@
       "45": {
         "name": "Single Command Execution",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "IEC 104 Single Command (Type ID 45) issued to toggle remote digital output state."
       },
       "46": {
         "name": "Double Command Execution",
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "IEC 104 Double Command (Type ID 46) issued to trip/close remote breaker circuits."
       },
       "unauthorized_write_attempt": {
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "An unauthorized IEC 104 command execution was attempted on the RTU/IED."
       },
       "authorized_write_activity": {
         "severity": "INFO",
-        "nciipc_control": "Sec 6.4 - Operational Audit Logging",
+        "cii_control": "Sec 6.4 - Operational Audit Logging",
         "description": "Authorized IEC 104 command action verified from engineering workstation."
       },
       "unknown_function_code": {
         "severity": "WARNING",
-        "nciipc_control": "Sec 6.1 - Protocol Validation",
+        "cii_control": "Sec 6.1 - Protocol Validation",
         "description": "An unrecognized or unmonitored ASDU Type ID was detected in IEC 104 telemetry."
       }
     }

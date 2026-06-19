@@ -10,7 +10,7 @@ By participating in this project, you agree to maintain a professional, secure, 
 
 ### 1. Propose Changes
 * For bug fixes or minor parser logic updates, please open an issue first to discuss the context.
-* For adding new protocol parsers (e.g. S7Comm, BACnet, Profinet), describe the target NCIIPC guidelines mapping in your proposal.
+* For adding new protocol parsers (e.g. S7Comm, BACnet, Profinet), describe the target CII guidelines mapping in your proposal.
 
 ### 2. Set Up Development Environment
 * Clone the repository.

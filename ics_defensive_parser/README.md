@@ -1,6 +1,6 @@
 # Multi-Protocol ICS/SCADA Network Compliance Auditor
 
-A modular, lightweight, passive security compliance auditing engine designed to analyze Modbus TCP, DNP3, Siemens S7Comm, and IEC 60870-5-104 (IEC 104) network telemetry logs for operational anomaly detection and regulatory compliance under NCIIPC guidelines.
+A modular, lightweight, passive security compliance auditing engine designed to analyze Modbus TCP, DNP3, Siemens S7Comm, and IEC 60870-5-104 (IEC 104) network telemetry logs for operational anomaly detection and regulatory compliance under CII guidelines.
 
 [![CI Build & Test Status](https://github.com/Namanbhatt-01/ics-defensive-parser/actions/workflows/test.yml/badge.svg)](https://github.com/Namanbhatt-01/ics-defensive-parser/actions)
 [![Code Coverage](https://img.shields.io/badge/coverage-88%25-green.svg)](https://codecov.io/gh/Namanbhatt-01/ics-defensive-parser)
@@ -13,7 +13,7 @@ A modular, lightweight, passive security compliance auditing engine designed to 
 
 Critical Information Infrastructure (CII) assets like electrical grids, water treatment plants, telecom networks, and manufacturing facilities rely on legacy Operational Technology (OT) protocols. Because legacy industrial protocols lack native security (such as encryption or access controls), auditing their telemetry is crucial.
 
-This project is a **Passive Multi-Protocol ICS Log Auditor** designed to parse stored network transaction logs and run them against a configurable compliance baseline definition (`rules.json`). It flags unauthorized operations—such as remote state modifications (Write commands) from unauthorized source IP addresses, malformed protocol headers, or out-of-bounds functions—and maps them directly to the **National Critical Information Infrastructure Protection Centre (NCIIPC)** compliance guidelines.
+This project is a **Passive Multi-Protocol ICS Log Auditor** designed to parse stored network transaction logs and run them against a configurable compliance baseline definition (`rules.json`). It flags unauthorized operations—such as remote state modifications (Write commands) from unauthorized source IP addresses, malformed protocol headers, or out-of-bounds functions—and maps them directly to the **National Critical Information Infrastructure Protection Centre (CII)** compliance guidelines.
 
 ### Key Features
 * 🛡️ **Zero-Network Intrusion:** Completely passive offline parsing with no risk of disrupting delicate PLC/RTU hardware.
@@ -23,7 +23,7 @@ This project is a **Passive Multi-Protocol ICS Log Auditor** designed to parse s
   * Checks IEC 104 APCI start byte sync headers (`0x68`).
   * Flags control commands directed to network broadcast address endpoints (`255.255.255.255`).
   * Enforces DNP3 function code range bounds validation ($0 \le \text{FC} \le 131$).
-* 📋 **Compliance Mapping:** Direct alignment of logged anomalies to NCIIPC Guidelines (e.g., Access Control, Audit Logging, Protocol Validation, Firmware Integrity).
+* 📋 **Compliance Mapping:** Direct alignment of logged anomalies to CII Guidelines (e.g., Access Control, Audit Logging, Protocol Validation, Firmware Integrity).
 * ⚙️ **Configurable Baselines:** Declarative rules schema allows security operators to easily define authorized engineering workstations.
 * 📊 **Audit Trail Generation:** Creates clean, human-readable text logs capturing payload signatures, severity levels, and threat resolutions.
 
@@ -101,7 +101,7 @@ graph TD
 ## 📋 Sample Configuration and Log Formats
 
 ### 1. Compliance Baseline Definition (`rules.json`)
-The declarative configuration defines authorized engineering workstation IPs and maps protocol codes to NCIIPC sections:
+The declarative configuration defines authorized engineering workstation IPs and maps protocol codes to CII sections:
 ```json
 {
   "authorized_engineering_workstations": [
@@ -113,7 +113,7 @@ The declarative configuration defines authorized engineering workstation IPs and
     "compliance_mapping": {
       "unauthorized_write_attempt": {
         "severity": "CRITICAL",
-        "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+        "cii_control": "Sec 6.2 - Access Control & Authorization",
         "description": "A write command was issued to an ICS Modbus PLC endpoint from an unauthorized source IP address."
       }
     }
@@ -140,11 +140,11 @@ Telemetry log frames store low-level packet fields including unit identifiers, f
 
 ---
 
-## 🛡️ NCIIPC Compliance & MITRE ATT&CK Mapping
+## 🛡️ CII Compliance & MITRE ATT&CK Mapping
 
 Our audit engine evaluates log anomalies using the following compliance and threat framework mapping:
 
-| Event Type / Protocol Code | Severity | Target NCIIPC Control Point | MITRE ATT&CK for ICS ID | Description & Mitigative Intent |
+| Event Type / Protocol Code | Severity | Target CII Control Point | MITRE ATT&CK for ICS ID | Description & Mitigative Intent |
 | :--- | :--- | :--- | :--- | :--- |
 | **`unauthorized_write_attempt`** | `CRITICAL` | **Sec 6.2 - Access Control** | **T0836** - Modify Parameter | Restricts PLC configuration change rights strictly to defined IP leases or physical workstations. |
 | **`authorized_write_activity`** | `INFO` | **Sec 6.4 - Audit Logging** | N/A | Maintains a permanent trace of routine administrative updates for configuration management. |
@@ -163,7 +163,7 @@ Our audit engine evaluates log anomalies using the following compliance and thre
 
 When the compliance decision engine intercepts an unauthorized control operation, it writes a structured, forensic audit record to the persistent log file:
 ```text
-[2026-06-19T09:31:45Z] SEVERITY: CRITICAL | NCIIPC Control: Sec 6.2 - Access Control & Authorization | Protocol: DNP3
+[2026-06-19T09:31:45Z] SEVERITY: CRITICAL | CII Control: Sec 6.2 - Access Control & Authorization | Protocol: DNP3
   Event Type  : unauthorized_write_attempt
   Details     : CRITICAL: Unauthorized DNP3 control action (Select (Select Before Operate)) attempted on outstation from non-workstation IP 192.168.1.215.
   Source IP   : 192.168.1.215 -> Destination IP: 192.168.1.12
@@ -185,7 +185,7 @@ To add monitoring mappings for new telemetry function codes (e.g. adding a warni
    "42": {
      "name": "PLC Run (Start Process)",
      "severity": "WARNING",
-     "nciipc_control": "Sec 6.2 - Access Control & Authorization",
+     "cii_control": "Sec 6.2 - Access Control & Authorization",
      "description": "S7comm request command issued to transition PLC state from STOP to RUN execution mode."
    }
    ```
@@ -256,7 +256,7 @@ The project includes an automated, zone-based test suite (`tests/run_compliance_
 
 1. **Zone 1: Standard Operational Telemetry Baseline**
    * Verifies that allowed polling transactions (Modbus FC 3, S7Comm FC 240) bypass alert escalation.
-   * Verifies that mapped read operations (Modbus FC 43 Device ID scan) correctly flag INFO alerts aligned with NCIIPC Sec 6.4.
+   * Verifies that mapped read operations (Modbus FC 43 Device ID scan) correctly flag INFO alerts aligned with CII Sec 6.4.
 2. **Zone 2: Protocol Header Integrity Checks**
    * Validates DNP3 magic start byte checks (`0x0564`).
    * Validates IEC 104 APCI start byte checks (`0x68`).
