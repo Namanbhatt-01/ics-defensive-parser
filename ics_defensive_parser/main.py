@@ -3,16 +3,24 @@
 Passive Multi-Protocol ICS Network Compliance Auditing Engine
 Integrates defensive validation logic for Modbus TCP, DNP3, Siemens S7Comm, and IEC 60870-5-104 (IEC 104).
 Maps anomalous control actions, protocol validation issues, and network anomalies
-directly to NCIIPC compliance guidelines.
+directly to NCIIPC compliance guidelines and calculates operational risk scores.
 """
 
 import json
 import os
 import sys
 import re
+import argparse
 from datetime import datetime
 
-# Regex validations to check input sanity and mitigate potential exploit vectors (e.g. path injection, fuzzed strings)
+# Severity level mapping to filter logs during compliance audits
+SEVERITY_LEVELS = {
+    "INFO": 1,
+    "WARNING": 2,
+    "CRITICAL": 3
+}
+
+# Regex validations to check input sanity and mitigate potential exploit vectors
 IPV4_REGEX = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
 HEX_REGEX = re.compile(r"^[0-9a-fA-F]*$")
 
@@ -29,11 +37,6 @@ except ImportError as e:
     # Fail-safe termination: Sanitized error reporting without system stack tracing
     print(f"[-] Internal Error: Critical components failed to load. Details: {e}", file=sys.stderr)
     sys.exit(1)
-
-# Paths configuration
-RULES_PATH = os.path.join(BASE_DIR, "rules.json")
-LOGS_PATH = os.path.join(BASE_DIR, "mock_logs.json")
-AUDIT_REPORT_PATH = os.path.join(BASE_DIR, "audit_report.txt")
 
 def is_valid_ipv4(ip_str):
     """Validates that a string conforms to a valid IPv4 address pattern (0-255 bounds)."""
@@ -54,46 +57,76 @@ def is_valid_hex_payload(payload_str):
 def load_json_file(file_path):
     """Loads a JSON file safely. Sanitizes error outputs to prevent path/system details leaks."""
     if not os.path.exists(file_path):
-        print("[-] Critical: Required configuration or log file is missing.", file=sys.stderr)
+        print(f"[-] Critical: Required file is missing at {file_path}", file=sys.stderr)
         sys.exit(1)
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
     except json.JSONDecodeError:
-        print("[-] Critical: Failed to parse configuration file. Invalid file structure.", file=sys.stderr)
+        print(f"[-] Critical: Failed to parse {file_path}. Invalid file structure.", file=sys.stderr)
         sys.exit(1)
     except Exception:
-        print("[-] Critical: An unexpected system read error occurred.", file=sys.stderr)
+        print(f"[-] Critical: An unexpected system read error occurred for {file_path}", file=sys.stderr)
         sys.exit(1)
 
+def calculate_threat_level(score):
+    """Maps a numerical threat score to an NCIIPC operational threat level category."""
+    if score <= 15:
+        return "LOW", "Nominal Operational Baseline"
+    elif score <= 40:
+        return "MEDIUM", "Minor Log Anomalies Detected"
+    elif score <= 75:
+        return "HIGH", "Unauthorized ICS Operations Flagged"
+    else:
+        return "CRITICAL", "Potential Cyber-Physical Attack Underway"
+
 def main():
-    print("=" * 85)
-    print("       PASSIVE ICS/SCADA MULTI-PROTOCOL COMPLIANCE AUDITING ENGINE       ")
-    print("   [ Protocols: Modbus TCP | DNP3 | Siemens S7Comm | IEC 60870-5-104 (IEC 104) ]   ")
-    print("=" * 85)
+    # Setup command line interface arguments
+    parser = argparse.ArgumentParser(description="Multi-Protocol ICS Passive Compliance Auditing Engine")
+    parser.add_argument("-r", "--rules", default=os.path.join(BASE_DIR, "rules.json"), help="Path to rules.json")
+    parser.add_argument("-l", "--logs", default=os.path.join(BASE_DIR, "mock_logs.json"), help="Path to mock_logs.json")
+    parser.add_argument("-v", "--level", choices=["INFO", "WARNING", "CRITICAL"], help="Minimum log severity level to audit")
     
+    args = parser.parse_args()
+
     # Securely load configuration rules and logs
-    rules = load_json_file(RULES_PATH)
-    logs = load_json_file(LOGS_PATH)
+    rules = load_json_file(args.rules)
+    logs = load_json_file(args.logs)
+    
+    # Configure logging threshold limit
+    config_threshold = args.level or rules.get("system_config", {}).get("default_logging_threshold", "INFO")
+    threshold_weight = SEVERITY_LEVELS.get(config_threshold, 1)
     
     auth_ips = rules.get("authorized_engineering_workstations", [])
+    risk_weights = rules.get("system_config", {}).get("risk_scoring_weights", {})
     
     warnings_found = 0
     total_logs = len(logs)
     audit_entries = []
     
+    # Threat score calculation variables
+    accumulated_threat_score = 0
+    
+    audit_report_path = os.path.join(BASE_DIR, "audit_report.txt")
+    
     # Initialize/Reset audit report file safely
     try:
-        with open(AUDIT_REPORT_PATH, 'w') as report:
+        with open(audit_report_path, 'w') as report:
             report.write("=" * 85 + "\n")
             report.write("               NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               \n")
-            report.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            report.write("Scope: Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit\n")
+            report.write(f"Generated on : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            report.write("Scope        : Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit\n")
+            report.write(f"Filter Level : {config_threshold} and higher\n")
             report.write("=" * 85 + "\n\n")
     except Exception:
         print("[-] Critical: Unable to write audit report to disk. Check directory permissions.", file=sys.stderr)
         sys.exit(1)
         
+    print("=" * 85)
+    print("       PASSIVE ICS/SCADA MULTI-PROTOCOL COMPLIANCE AUDITING ENGINE       ")
+    print("   [ Protocols: Modbus TCP | DNP3 | Siemens S7Comm | IEC 60870-5-104 (IEC 104) ]   ")
+    print("=" * 85)
+    print(f"[*] Audit Severity Filter: {config_threshold} (Only recording events of level {config_threshold} or higher)")
     print(f"[*] Analyzing {total_logs} network traffic log entries...")
     
     for idx, entry in enumerate(logs, 1):
@@ -108,7 +141,6 @@ def main():
         payload = entry.get("payload", "")
         
         if not is_valid_ipv4(src_ip) or not is_valid_ipv4(dst_ip):
-            # Log as a critical protocol anomaly under Sec 6.1 (fuzzed/invalid address)
             alert = {
                 "type": "invalid_ip_anomaly",
                 "details": f"CRITICAL: Non-compliant IPv4 address structure detected (Source: '{src_ip}' | Destination: '{dst_ip}')."
@@ -131,7 +163,6 @@ def main():
             }
             
         elif not is_valid_hex_payload(payload):
-            # Log as a critical payload format check failure (non-hex payload)
             alert = {
                 "type": "malformed_payload_anomaly",
                 "details": "CRITICAL: Non-hexadecimal characters detected in binary payload field."
@@ -159,7 +190,6 @@ def main():
             proto_rules = rules.get("Modbus", {})
             func_code = parsed.get("function_code", 0)
             
-            # Type assertion to protect against injection/type-confusion
             try:
                 func_code = int(func_code)
             except (ValueError, TypeError):
@@ -398,49 +428,74 @@ def main():
             }
             
         if alert:
+            # Determine mapping based on event type
             func_code_str = str(parsed.get("function_code") if "function_code" in parsed else parsed.get("type_id"))
             mapping = comp_map.get(alert["type"], comp_map.get(func_code_str, {}))
             severity = mapping.get("severity", "UNKNOWN")
             nciipc_ctrl = mapping.get("nciipc_control", "N/A")
             desc = mapping.get("description", "")
             
-            audit_log_entry = (
-                f"[{parsed.get('timestamp')}] SEVERITY: {severity} | NCIIPC Control: {nciipc_ctrl} | Protocol: {parsed['protocol']}\n"
-                f"  Event Type  : {alert['type']}\n"
-                f"  Details     : {alert['details']}\n"
-                f"  Source IP   : {parsed['source_ip']} -> Destination IP: {parsed['destination_ip']}\n"
-                f"  Payload     : {parsed.get('payload', '')}\n"
-                f"  Log Note    : {parsed.get('notes', '')}\n"
-                f"  Resolution  : {desc}\n"
-                f"{'-' * 80}\n"
-            )
-            audit_entries.append((severity, audit_log_entry))
+            # Accumulate operational risk score dynamically based on rules weight mappings
+            alert_type = alert["type"]
+            weight = risk_weights.get(alert_type, 0)
+            accumulated_threat_score += weight
             
-            # Print feedback to CLI using standard ANSI escape codes for coloring
-            color_prefix = ""
-            if severity == "CRITICAL":
-                color_prefix = "\033[91m[!] CRITICAL\033[0m"
-            elif severity == "WARNING":
-                color_prefix = "\033[93m[!] WARNING\033[0m"
-            else:
-                color_prefix = "\033[94m[*] INFO\033[0m"
+            # Check logging severity filter levels
+            severity_weight = SEVERITY_LEVELS.get(severity, 1)
+            
+            if severity_weight >= threshold_weight:
+                audit_log_entry = (
+                    f"[{parsed.get('timestamp')}] SEVERITY: {severity} | NCIIPC Control: {nciipc_ctrl} | Protocol: {parsed['protocol']}\n"
+                    f"  Event Type  : {alert['type']}\n"
+                    f"  Details     : {alert['details']}\n"
+                    f"  Source IP   : {parsed['source_ip']} -> Destination IP: {parsed['destination_ip']}\n"
+                    f"  Payload     : {parsed.get('payload', '')}\n"
+                    f"  Log Note    : {parsed.get('notes', '')}\n"
+                    f"  Resolution  : {desc}\n"
+                    f"{'-' * 80}\n"
+                )
+                audit_entries.append((severity, audit_log_entry))
                 
-            print(f"{color_prefix} Protocol: {parsed['protocol']} | IP: {parsed['source_ip']} | NCIIPC: {nciipc_ctrl}")
+                # Print feedback to CLI with severity color coding
+                color_prefix = ""
+                if severity == "CRITICAL":
+                    color_prefix = "\033[91m[!] CRITICAL\033[0m"
+                elif severity == "WARNING":
+                    color_prefix = "\033[93m[!] WARNING\033[0m"
+                else:
+                    color_prefix = "\033[94m[*] INFO\033[0m"
+                    
+                print(f"{color_prefix} Protocol: {parsed['protocol']} | IP: {parsed['source_ip']} | NCIIPC: {nciipc_ctrl}")
 
-    # Write findings to persistent report file safely
+    # Finalize Threat Level Assessments
+    clamped_threat_score = min(100, max(0, accumulated_threat_score))
+    threat_status, threat_desc = calculate_threat_level(clamped_threat_score)
+    
+    # Format the dynamic threat assessment summary
+    risk_summary_cli = (
+        f"\n[*] =================== OPERATIONAL THREAT ASSESSMENT ===================\n"
+        f"[*] Overall Threat Score: {clamped_threat_score}/100\n"
+        f"[*] Operational Status  : {threat_status} - {threat_desc}\n"
+        f"[*] ====================================================================="
+    )
+    print(risk_summary_cli)
+
+    # Write findings and threat assessments to persistent report file safely
     try:
-        with open(AUDIT_REPORT_PATH, 'a') as report:
+        with open(audit_report_path, 'a') as report:
             if audit_entries:
                 for severity, entry_text in audit_entries:
                     report.write(entry_text)
             else:
-                report.write("No compliance anomalies detected. Network baseline conforms with guidelines.\n")
+                report.write("No compliance anomalies matching the configured threshold filter were detected.\n")
                 
             report.write("\n" + "=" * 80 + "\n")
             report.write(f"SUMMARY STATISTICS:\n")
-            report.write(f"Total Logs Parsed   : {total_logs}\n")
-            report.write(f"Compliance Alerts   : {len(audit_entries)}\n")
-            report.write(f"Critical Warnings   : {warnings_found}\n")
+            report.write(f"Total Logs Parsed     : {total_logs}\n")
+            report.write(f"Compliance Alerts     : {len(audit_entries)}\n")
+            report.write(f"Filtered Warnings     : {warnings_found}\n")
+            report.write(f"Threat Risk Score     : {clamped_threat_score}/100\n")
+            report.write(f"System Threat Status  : {threat_status} ({threat_desc})\n")
             report.write("=" * 80 + "\n")
     except Exception:
         print("[-] Critical: Failed to update audit report. Log write error.", file=sys.stderr)
@@ -448,7 +503,7 @@ def main():
         
     print("=" * 85)
     print(f"[+] Compliance scan complete. Warnings flagged: {warnings_found}")
-    print(f"[+] Comprehensive report written to: {AUDIT_REPORT_PATH}")
+    print(f"[+] Comprehensive report written to: {audit_report_path}")
     print("=" * 85)
 
 if __name__ == "__main__":

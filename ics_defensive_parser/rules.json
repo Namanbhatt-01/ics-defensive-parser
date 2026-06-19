@@ -1,4 +1,19 @@
 {
+  "system_config": {
+    "default_logging_threshold": "INFO",
+    "risk_scoring_weights": {
+      "unauthorized_write_attempt": 25,
+      "dnp3_start_byte_anomaly": 20,
+      "iec104_start_byte_anomaly": 20,
+      "dnp3_broadcast_anomaly": 30,
+      "dnp3_func_code_anomaly": 15,
+      "unknown_function_code": 10,
+      "invalid_ip_anomaly": 15,
+      "malformed_payload_anomaly": 15,
+      "unsupported_protocol": 5,
+      "authorized_write_activity": 0
+    }
+  },
   "authorized_engineering_workstations": [
     "192.168.1.50"
   ],
