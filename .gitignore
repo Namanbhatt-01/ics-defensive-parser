@@ -1,9 +1,3 @@
-# Ignore research repositories cloned locally
-DNP3-Attack-Detection-System/
-ICS-Payload/
-ScapyDNP3_lib/
-scada-scanner/
-
 # Ignore Python runtime files
 __pycache__/
 *.pyc
