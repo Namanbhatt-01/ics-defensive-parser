@@ -18,3 +18,7 @@ audit_report.txt
 # Scratch / build artifacts
 generate_cast.py
 demo.cast
+
+# Ignore cloned profile repo
+Namanbhatt-01/
+
