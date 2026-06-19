@@ -112,3 +112,28 @@ python3 main.py
 [+] Comprehensive report written to: ./audit_report.txt
 =====================================================================================
 ```
+
+---
+
+## 🧪 Automated Testing & Verification
+
+The project includes an automated, zone-based test suite (`run_compliance_tests.py`) to systematically verify our parsers and rules engine across four distinct compliance validation zones:
+
+1. **Zone 1: Standard Operational Telemetry Baseline**
+   * Verifies that allowed polling transactions (Modbus FC 3, S7Comm FC 240) bypass alert escalation.
+   * Verifies that mapped read operations (Modbus FC 43 Device ID scan) correctly flag INFO alerts aligned with NCIIPC Sec 6.4.
+2. **Zone 2: Protocol Header Integrity Checks**
+   * Validates DNP3 magic start byte checks (`0x0564`).
+   * Validates IEC 104 APCI start byte checks (`0x68`).
+   * Enforces DNP3 out-of-bounds function code validation warnings.
+3. **Zone 3: Access Control & Logical Boundaries**
+   * Validates S7 PLC Stop command blocks and DNP3 file deletion attempts.
+   * Asserts that requests from unauthorized IPs trigger CRITICAL warnings, while verified engineering workstations (`192.168.1.50`) pass as INFO logs.
+4. **Zone 4: Subnet Segment Containment**
+   * Validates subnet isolation checks by monitoring broadcast targets.
+
+### Running the Test Suite
+Execute the test runner script from the repository root:
+```bash
+python3 run_compliance_tests.py
+```
