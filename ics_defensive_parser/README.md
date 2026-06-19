@@ -181,8 +181,17 @@ An interactive log processing session is represented below:
 * Python 3.x (No third-party packages required; utilizes standard library)
 
 ### Option A: Local Execution
-Run the auditor engine from the repository root:
+Run the auditor engine using the provided `Makefile` shortcuts from the repository root:
 ```bash
+# 1. Run the compliance auditor
+make run
+
+# 2. Run the automated unit tests
+make test
+```
+Alternatively, navigate to the `ics_defensive_parser/` directory and run the python script directly:
+```bash
+cd ics_defensive_parser
 python3 main.py
 ```
 
