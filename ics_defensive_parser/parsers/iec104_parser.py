@@ -6,8 +6,8 @@ def parse_iec104_log(log_entry):
     return {
         "protocol": "IEC104",
         "timestamp": log_entry.get("timestamp"),
-        "source_ip": log_entry.get("source_ip", "0.0.0.0"),
-        "destination_ip": log_entry.get("destination_ip", "0.0.0.0"),
+        "source_ip": log_entry.get("source_ip", "UNKNOWN"),
+        "destination_ip": log_entry.get("destination_ip", "UNKNOWN"),
         "type_id": log_entry.get("type_id", 0),       # ASDU Type Identifier (e.g. 45 = Single Command, 46 = Double Command)
         "payload": log_entry.get("payload", ""),
         "notes": log_entry.get("notes", "")

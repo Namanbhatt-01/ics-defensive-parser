@@ -118,8 +118,8 @@ def main():
         comp_map = {}
         
         # Extract and validate source/destination IPs to mitigate IP spoofing/validation bypass
-        src_ip = entry.get("source_ip", "0.0.0.0")
-        dst_ip = entry.get("destination_ip", "0.0.0.0")
+        src_ip = entry.get("source_ip", "UNKNOWN")
+        dst_ip = entry.get("destination_ip", "UNKNOWN")
         payload = entry.get("payload", "")
         
         if not is_valid_ipv4(src_ip) or not is_valid_ipv4(dst_ip):
