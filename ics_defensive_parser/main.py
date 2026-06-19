@@ -9,32 +9,61 @@ directly to NCIIPC compliance guidelines.
 import json
 import os
 import sys
+import re
 from datetime import datetime
+
+# Regex validations to check input sanity and mitigate potential exploit vectors (e.g. path injection, fuzzed strings)
+IPV4_REGEX = re.compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+HEX_REGEX = re.compile(r"^[0-9a-fA-F]*$")
 
 # Insert directory into path to ensure parsers package is importable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
-from parsers.modbus_parser import parse_modbus_log
-from parsers.dnp3_parser import parse_dnp3_log
-from parsers.s7_parser import parse_s7_log
-from parsers.iec104_parser import parse_iec104_log
+try:
+    from parsers.modbus_parser import parse_modbus_log
+    from parsers.dnp3_parser import parse_dnp3_log
+    from parsers.s7_parser import parse_s7_log
+    from parsers.iec104_parser import parse_iec104_log
+except ImportError as e:
+    # Fail-safe termination: Sanitized error reporting without system stack tracing
+    print(f"[-] Internal Error: Critical components failed to load. Details: {e}", file=sys.stderr)
+    sys.exit(1)
 
 # Paths configuration
 RULES_PATH = os.path.join(BASE_DIR, "rules.json")
 LOGS_PATH = os.path.join(BASE_DIR, "mock_logs.json")
 AUDIT_REPORT_PATH = os.path.join(BASE_DIR, "audit_report.txt")
 
+def is_valid_ipv4(ip_str):
+    """Validates that a string conforms to a valid IPv4 address pattern (0-255 bounds)."""
+    if not ip_str or not IPV4_REGEX.match(ip_str):
+        return False
+    try:
+        return all(0 <= int(part) <= 255 for part in ip_str.split("."))
+    except ValueError:
+        return False
+
+def is_valid_hex_payload(payload_str):
+    """Validates that a payload consists solely of valid hex characters (spaces ignored)."""
+    if not payload_str:
+        return True
+    sanitized = payload_str.replace(" ", "")
+    return bool(HEX_REGEX.match(sanitized))
+
 def load_json_file(file_path):
-    """Loads a JSON file and returns its content. Exits if the file is missing."""
+    """Loads a JSON file safely. Sanitizes error outputs to prevent path/system details leaks."""
     if not os.path.exists(file_path):
-        print(f"[-] Error: File not found at {file_path}", file=sys.stderr)
+        print("[-] Critical: Required configuration or log file is missing.", file=sys.stderr)
         sys.exit(1)
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
-    except json.JSONDecodeError as e:
-        print(f"[-] Error decoding JSON from {file_path}: {e}", file=sys.stderr)
+    except json.JSONDecodeError:
+        print("[-] Critical: Failed to parse configuration file. Invalid file structure.", file=sys.stderr)
+        sys.exit(1)
+    except Exception:
+        print("[-] Critical: An unexpected system read error occurred.", file=sys.stderr)
         sys.exit(1)
 
 def main():
@@ -43,11 +72,8 @@ def main():
     print("   [ Protocols: Modbus TCP | DNP3 | Siemens S7Comm | IEC 60870-5-104 (IEC 104) ]   ")
     print("=" * 85)
     
-    # Load rules and mock logs
-    print(f"[*] Loading compliance guidelines from: {RULES_PATH}")
+    # Securely load configuration rules and logs
     rules = load_json_file(RULES_PATH)
-    
-    print(f"[*] Loading network traffic logs from: {LOGS_PATH}")
     logs = load_json_file(LOGS_PATH)
     
     auth_ips = rules.get("authorized_engineering_workstations", [])
@@ -56,13 +82,17 @@ def main():
     total_logs = len(logs)
     audit_entries = []
     
-    # Initialize/Reset audit report file
-    with open(AUDIT_REPORT_PATH, 'w') as report:
-        report.write("=" * 85 + "\n")
-        report.write("               NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               \n")
-        report.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        report.write("Scope: Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit\n")
-        report.write("=" * 85 + "\n\n")
+    # Initialize/Reset audit report file safely
+    try:
+        with open(AUDIT_REPORT_PATH, 'w') as report:
+            report.write("=" * 85 + "\n")
+            report.write("               NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               \n")
+            report.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            report.write("Scope: Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit\n")
+            report.write("=" * 85 + "\n\n")
+    except Exception:
+        print("[-] Critical: Unable to write audit report to disk. Check directory permissions.", file=sys.stderr)
+        sys.exit(1)
         
     print(f"[*] Analyzing {total_logs} network traffic log entries...")
     
@@ -72,12 +102,69 @@ def main():
         parsed = {}
         comp_map = {}
         
+        # Extract and validate source/destination IPs to mitigate IP spoofing/validation bypass
+        src_ip = entry.get("source_ip", "0.0.0.0")
+        dst_ip = entry.get("destination_ip", "0.0.0.0")
+        payload = entry.get("payload", "")
+        
+        if not is_valid_ipv4(src_ip) or not is_valid_ipv4(dst_ip):
+            # Log as a critical protocol anomaly under Sec 6.1 (fuzzed/invalid address)
+            alert = {
+                "type": "invalid_ip_anomaly",
+                "details": f"CRITICAL: Non-compliant IPv4 address structure detected (Source: '{src_ip}' | Destination: '{dst_ip}')."
+            }
+            comp_map = {
+                "invalid_ip_anomaly": {
+                    "severity": "CRITICAL",
+                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "description": "Network telemetry log contains malformed IP address headers. Violates basic IP routing guidelines."
+                }
+            }
+            warnings_found += 1
+            parsed = {
+                "protocol": protocol,
+                "timestamp": entry.get("timestamp", datetime.now().isoformat()),
+                "source_ip": src_ip,
+                "destination_ip": dst_ip,
+                "payload": payload,
+                "notes": entry.get("notes", "Malformed IP header metadata.")
+            }
+            
+        elif not is_valid_hex_payload(payload):
+            # Log as a critical payload format check failure (non-hex payload)
+            alert = {
+                "type": "malformed_payload_anomaly",
+                "details": "CRITICAL: Non-hexadecimal characters detected in binary payload field."
+            }
+            comp_map = {
+                "malformed_payload_anomaly": {
+                    "severity": "CRITICAL",
+                    "nciipc_control": "Sec 6.1 - Protocol Validation",
+                    "description": "Binary payload contains non-hex characters. Indicates potential frame injection or log corruption."
+                }
+            }
+            warnings_found += 1
+            parsed = {
+                "protocol": protocol,
+                "timestamp": entry.get("timestamp", datetime.now().isoformat()),
+                "source_ip": src_ip,
+                "destination_ip": dst_ip,
+                "payload": payload,
+                "notes": entry.get("notes", "Hex validation check failed.")
+            }
+            
         # 1. Modbus TCP Protocol Validation and Auditing
-        if protocol == "ModbusTCP":
+        elif protocol == "ModbusTCP":
             parsed = parse_modbus_log(entry)
             proto_rules = rules.get("Modbus", {})
-            func_code = parsed["function_code"]
+            func_code = parsed.get("function_code", 0)
             
+            # Type assertion to protect against injection/type-confusion
+            try:
+                func_code = int(func_code)
+            except (ValueError, TypeError):
+                func_code = -1
+                
             allowed_reads = proto_rules.get("allowed_read_function_codes", [])
             monitored_writes = proto_rules.get("monitored_write_function_codes", [])
             comp_map = proto_rules.get("compliance_mapping", {})
@@ -113,7 +200,13 @@ def main():
         elif protocol == "DNP3":
             parsed = parse_dnp3_log(entry)
             proto_rules = rules.get("DNP3", {})
-            func_code = parsed["function_code"]
+            func_code = parsed.get("function_code", 0)
+            
+            try:
+                func_code = int(func_code)
+            except (ValueError, TypeError):
+                func_code = -1
+                
             payload = parsed.get("payload", "")
             dest_ip = parsed.get("destination_ip", "")
             comp_map = proto_rules.get("compliance_mapping", {})
@@ -188,7 +281,13 @@ def main():
         elif protocol == "S7Comm":
             parsed = parse_s7_log(entry)
             proto_rules = rules.get("S7Comm", {})
-            func_code = parsed["function_code"]
+            func_code = parsed.get("function_code", 0)
+            
+            try:
+                func_code = int(func_code)
+            except (ValueError, TypeError):
+                func_code = -1
+                
             comp_map = proto_rules.get("compliance_mapping", {})
             
             allowed_reads = proto_rules.get("allowed_read_function_codes", [])
@@ -224,7 +323,13 @@ def main():
         elif protocol == "IEC104":
             parsed = parse_iec104_log(entry)
             proto_rules = rules.get("IEC104", {})
-            type_id = parsed["type_id"]
+            type_id = parsed.get("type_id", 0)
+            
+            try:
+                type_id = int(type_id)
+            except (ValueError, TypeError):
+                type_id = -1
+                
             payload = parsed.get("payload", "")
             comp_map = proto_rules.get("compliance_mapping", {})
             
@@ -285,11 +390,11 @@ def main():
             warnings_found += 1
             parsed = {
                 "protocol": protocol,
-                "timestamp": entry.get("timestamp"),
-                "source_ip": entry.get("source_ip", "0.0.0.0"),
-                "destination_ip": entry.get("destination_ip", "0.0.0.0"),
-                "payload": entry.get("payload", ""),
-                "notes": entry.get("notes", "")
+                "timestamp": entry.get("timestamp", datetime.now().isoformat()),
+                "source_ip": src_ip,
+                "destination_ip": dst_ip,
+                "payload": payload,
+                "notes": entry.get("notes", "Unsupported protocol header.")
             }
             
         if alert:
@@ -300,7 +405,7 @@ def main():
             desc = mapping.get("description", "")
             
             audit_log_entry = (
-                f"[{parsed['timestamp']}] SEVERITY: {severity} | NCIIPC Control: {nciipc_ctrl} | Protocol: {parsed['protocol']}\n"
+                f"[{parsed.get('timestamp')}] SEVERITY: {severity} | NCIIPC Control: {nciipc_ctrl} | Protocol: {parsed['protocol']}\n"
                 f"  Event Type  : {alert['type']}\n"
                 f"  Details     : {alert['details']}\n"
                 f"  Source IP   : {parsed['source_ip']} -> Destination IP: {parsed['destination_ip']}\n"
@@ -311,7 +416,7 @@ def main():
             )
             audit_entries.append((severity, audit_log_entry))
             
-            # Colored CLI alerts
+            # Print feedback to CLI using standard ANSI escape codes for coloring
             color_prefix = ""
             if severity == "CRITICAL":
                 color_prefix = "\033[91m[!] CRITICAL\033[0m"
@@ -322,20 +427,24 @@ def main():
                 
             print(f"{color_prefix} Protocol: {parsed['protocol']} | IP: {parsed['source_ip']} | NCIIPC: {nciipc_ctrl}")
 
-    # Write logs to report file
-    with open(AUDIT_REPORT_PATH, 'a') as report:
-        if audit_entries:
-            for severity, entry_text in audit_entries:
-                report.write(entry_text)
-        else:
-            report.write("No compliance anomalies detected. Network baseline conforms with guidelines.\n")
-            
-        report.write("\n" + "=" * 80 + "\n")
-        report.write(f"SUMMARY STATISTICS:\n")
-        report.write(f"Total Logs Parsed   : {total_logs}\n")
-        report.write(f"Compliance Alerts   : {len(audit_entries)}\n")
-        report.write(f"Critical Warnings   : {warnings_found}\n")
-        report.write("=" * 80 + "\n")
+    # Write findings to persistent report file safely
+    try:
+        with open(AUDIT_REPORT_PATH, 'a') as report:
+            if audit_entries:
+                for severity, entry_text in audit_entries:
+                    report.write(entry_text)
+            else:
+                report.write("No compliance anomalies detected. Network baseline conforms with guidelines.\n")
+                
+            report.write("\n" + "=" * 80 + "\n")
+            report.write(f"SUMMARY STATISTICS:\n")
+            report.write(f"Total Logs Parsed   : {total_logs}\n")
+            report.write(f"Compliance Alerts   : {len(audit_entries)}\n")
+            report.write(f"Critical Warnings   : {warnings_found}\n")
+            report.write("=" * 80 + "\n")
+    except Exception:
+        print("[-] Critical: Failed to update audit report. Log write error.", file=sys.stderr)
+        sys.exit(1)
         
     print("=" * 85)
     print(f"[+] Compliance scan complete. Warnings flagged: {warnings_found}")

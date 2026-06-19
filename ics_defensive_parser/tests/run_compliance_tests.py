@@ -9,8 +9,8 @@ import json
 import os
 import sys
 
-# Configure path imports
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Configure path imports to locate the parent directory containing main.py
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 from main import load_json_file

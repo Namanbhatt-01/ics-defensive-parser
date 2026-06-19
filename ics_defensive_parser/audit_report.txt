@@ -1,6 +1,6 @@
 =====================================================================================
                NCIIPC ICS MULTI-PROTOCOL COMPLIANCE REPORT               
-Generated on: 2026-06-19 09:58:58
+Generated on: 2026-06-19 10:59:30
 Scope: Passive Modbus TCP, DNP3, Siemens S7comm, and IEC 104 Baseline Audit
 =====================================================================================
 
