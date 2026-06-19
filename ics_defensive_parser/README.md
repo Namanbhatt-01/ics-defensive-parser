@@ -29,6 +29,46 @@ This project is a **Passive Multi-Protocol ICS Log Auditor** designed to parse s
 
 ---
 
+## 📁 Repository Structure
+
+```text
+ics-defensive-parser/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   └── workflows/
+│       ├── test.yml
+│       └── dependabot.yml
+├── ics_defensive_parser/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── parsers/
+│   │   ├── __init__.py
+│   │   ├── dnp3_parser.py
+│   │   ├── iec104_parser.py
+│   │   ├── modbus_parser.py
+│   │   └── s7_parser.py
+│   └── utils.py
+├── data/
+│   ├── mock_logs.json
+│   └── rules.json
+├── tests/
+│   ├── __init__.py
+│   └── run_compliance_tests.py
+├── .gitignore
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── Dockerfile
+├── LICENSE
+├── Makefile
+├── README.md
+├── requirements.txt
+└── SECURITY.md
+```
+
+---
+
 ## 📊 Performance Metrics & Benchmarks
 
 Optimized to parse and filter industrial packet logs with minimum memory overhead:
