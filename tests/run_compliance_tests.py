@@ -9,9 +9,9 @@ import json
 import os
 import sys
 
-# Configure path imports to locate the parent directory containing main.py
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE_DIR)
+# Configure path imports to locate the workspace root and import main from package
+WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(WORKSPACE_DIR, "ics_defensive_parser"))
 
 from main import load_json_file
 from parsers.modbus_parser import parse_modbus_log
@@ -19,8 +19,8 @@ from parsers.dnp3_parser import parse_dnp3_log
 from parsers.s7_parser import parse_s7_log
 from parsers.iec104_parser import parse_iec104_log
 
-RULES_PATH = os.path.join(BASE_DIR, "rules.json")
-LOGS_PATH = os.path.join(BASE_DIR, "mock_logs.json")
+RULES_PATH = os.path.join(WORKSPACE_DIR, "data", "rules.json")
+LOGS_PATH = os.path.join(WORKSPACE_DIR, "data", "mock_logs.json")
 
 class ICSTestRunner:
     def __init__(self):

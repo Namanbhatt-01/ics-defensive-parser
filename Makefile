@@ -21,14 +21,14 @@ run:
 	python3 ics_defensive_parser/main.py
 
 test:
-	python3 ics_defensive_parser/tests/run_compliance_tests.py
+	python3 tests/run_compliance_tests.py
 
 lint:
-	flake8 ics_defensive_parser --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 ics_defensive_parser --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 ics_defensive_parser tests --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 ics_defensive_parser tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 security:
-	bandit -r ics_defensive_parser/ -ll -ii
+	bandit -r ics_defensive_parser/ tests/ -ll -ii
 
 docker-build:
 	docker build -t ics-auditor ./ics_defensive_parser

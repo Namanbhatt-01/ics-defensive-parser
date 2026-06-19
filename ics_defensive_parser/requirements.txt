@@ -1,5 +1,0 @@
-# ICS Multi-Protocol Compliance Auditor Requirements
-# This project relies entirely on the Python 3 Standard Library.
-# No external pip dependencies are required.
-
-python_version >= "3.6"

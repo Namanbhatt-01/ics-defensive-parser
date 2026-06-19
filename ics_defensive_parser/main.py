@@ -26,6 +26,7 @@ HEX_REGEX = re.compile(r"^[0-9a-fA-F]*$")
 
 # Insert directory into path to ensure parsers package is importable
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WORKSPACE_DIR = os.path.dirname(BASE_DIR)
 sys.path.insert(0, BASE_DIR)
 
 try:
@@ -83,8 +84,8 @@ def calculate_threat_level(score):
 def main():
     # Setup command line interface arguments
     parser = argparse.ArgumentParser(description="Multi-Protocol ICS Passive Compliance Auditing Engine")
-    parser.add_argument("-r", "--rules", default=os.path.join(BASE_DIR, "rules.json"), help="Path to rules.json")
-    parser.add_argument("-l", "--logs", default=os.path.join(BASE_DIR, "mock_logs.json"), help="Path to mock_logs.json")
+    parser.add_argument("-r", "--rules", default=os.path.join(WORKSPACE_DIR, "data", "rules.json"), help="Path to rules.json")
+    parser.add_argument("-l", "--logs", default=os.path.join(WORKSPACE_DIR, "data", "mock_logs.json"), help="Path to mock_logs.json")
     parser.add_argument("-v", "--level", choices=["INFO", "WARNING", "CRITICAL"], help="Minimum log severity level to audit")
     
     args = parser.parse_args()
@@ -107,7 +108,7 @@ def main():
     # Threat score calculation variables
     accumulated_threat_score = 0
     
-    audit_report_path = os.path.join(BASE_DIR, "audit_report.txt")
+    audit_report_path = os.path.join(WORKSPACE_DIR, "audit_report.txt")
     
     # Initialize/Reset audit report file safely
     try:

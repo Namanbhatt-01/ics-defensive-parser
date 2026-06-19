@@ -7,3 +7,6 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore local runtime compliance reports
+audit_report.txt
